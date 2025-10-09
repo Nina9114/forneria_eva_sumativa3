@@ -1,0 +1,97 @@
+# 🚀 GUÍA RÁPIDA DE INSTALACIÓN
+# Proyecto Django Fornería
+
+## PASO 1: Abrir Git Bash
+# Navegar al directorio del proyecto
+cd /c/Users/magdd/forneria_project
+
+## PASO 2: Crear Entorno Virtual
+python -m venv venv
+
+## PASO 3: Activar Entorno Virtual
+source venv/Scripts/activate
+
+## PASO 4: Instalar Dependencias
+pip install -r requirements.txt
+
+## PASO 5: Verificar que WAMP esté corriendo
+# Asegúrate de que el ícono de WAMP esté VERDE
+# MySQL debe estar activo
+
+## PASO 6: Verificar archivo .env
+# Abre el archivo .env y verifica tu contraseña de MySQL
+# Si no tienes contraseña, deja: DB_PASSWORD=
+cat .env
+
+## PASO 7: Crear Migraciones
+python manage.py makemigrations
+
+## PASO 8: Aplicar Migraciones
+python manage.py migrate
+
+## PASO 9: Crear Superusuario
+python manage.py createsuperuser
+# Username: admin
+# Email: admin@forneria.cl
+# Password: admin123
+
+## PASO 10: Cargar Datos de Prueba
+python manage.py seed_data
+
+## PASO 11: Ejecutar Servidor
+python manage.py runserver
+
+## PASO 12: Acceder al Admin
+# Abrir navegador en: http://127.0.0.1:8000/admin/
+
+## CREDENCIALES:
+# Administrador: admin / admin123
+# Vendedor: vendedor_juan / vendedor123
+
+## COMANDOS ADICIONALES:
+
+# Para detener el servidor: Ctrl + C
+
+# Para desactivar el entorno virtual:
+deactivate
+
+# Para reactivar el entorno virtual:
+source venv/Scripts/activate
+
+# Para ver las migraciones:
+python manage.py showmigrations
+
+# Para abrir shell de Django:
+python manage.py shell
+
+## SOLUCIÓN DE PROBLEMAS:
+
+# Si no puedes conectar a MySQL:
+# 1. Verifica que WAMP esté corriendo (ícono verde)
+# 2. Verifica tu contraseña en .env
+# 3. Usa 127.0.0.1 en lugar de localhost
+
+# Si falla mysqlclient:
+pip install --upgrade mysqlclient
+
+# Si hay error con migraciones:
+python manage.py migrate --fake-initial
+
+## GIT - Subir a GitHub:
+
+# Inicializar repositorio (si no está inicializado):
+git init
+
+# Agregar remote:
+git remote add origin https://github.com/Nina9114/forneria_project.git
+
+# Agregar archivos:
+git add .
+
+# Hacer commit:
+git commit -m "Initial commit: Django Fornería project"
+
+# Subir a GitHub:
+git branch -M main
+git push -u origin main
+
