@@ -1,43 +1,44 @@
-# 🍞 Sistema de Gestión Fornería - Django Admin
+# Sistema de Gestión Fornería - Django Admin
 
-Proyecto Django para gestión integral de panadería/fornería con Django Admin completamente personalizado.
+Aplicación web desarrollada en Django para la gestión integral de una fornería, implementando Django Admin con personalizaciones avanzadas y sistema de roles.
 
-**Autor:** Nina9114  
-**GitHub:** https://github.com/Nina9114  
-**Institución:** Duoc UC
-
----
-
-## 📋 Descripción del Proyecto
-
-Sistema web desarrollado en Django que permite gestionar todas las operaciones de una fornería, incluyendo:
-- Gestión de productos y categorías
-- Control de inventario con alertas automáticas
-- Registro de ventas con cálculo automático de IVA
-- Administración de clientes
-- Sistema de roles con permisos diferenciados (Administrador y Vendedor)
-- Información nutricional de productos
+**Institución:** INACAP  
+**Asignatura:** Desarrollo de Aplicaciones Web  
+**Tecnologías:** Django, MySQL, Python
 
 ---
 
-## ✨ Características Principales
+## Descripción del Proyecto
 
-### ✅ Conexión a Base de Datos
+Aplicación web desarrollada en Django que implementa un sistema de gestión para fornería con las siguientes funcionalidades:
+
+- **Gestión de productos:** Catálogo completo con categorías e información nutricional
+- **Control de inventario:** Seguimiento de stock con alertas automáticas
+- **Sistema de ventas:** Registro de transacciones con cálculo de IVA
+- **Administración de clientes:** Base de datos de clientes con información de contacto
+- **Sistema de roles:** Permisos diferenciados para Administrador y Vendedor
+- **Django Admin personalizado:** Interfaz administrativa con funcionalidades avanzadas
+
+---
+
+## Características Técnicas
+
+### Base de Datos
 - **MySQL** configurado con variables de entorno (`.env`)
-- Migraciones correctas y funcionales
+- Migraciones aplicadas correctamente
 - Compatible con WAMP/phpMyAdmin
 
-### ✅ Admin Básico
+### Django Admin Básico
 - **6 Tablas Maestras:** Direccion, Roles, Clientes, Categorias, Nutricional, Productos
 - **5 Tablas Operativas:** Ventas, Detalle_Venta, Movimientos_Inventario, Alertas, Usuarios
-- Configuración completa con:
+- Configuración implementada:
   - `list_display`: Columnas personalizadas
   - `search_fields`: Búsquedas por nombre, RUT, email, folio
   - `list_filter`: Filtros por categoría, fecha, estado, tipo
   - `ordering`: Ordenamiento por defecto
   - `list_select_related`: Optimización de consultas
 
-### ✅ Admin Pro
+### Django Admin Avanzado
 1. **Inline (DetalleVentaInline):** 
    - Permite agregar/editar items de venta directamente en el formulario de venta
    - Calcula subtotales automáticamente
@@ -52,23 +53,23 @@ Sistema web desarrollado en Django que permite gestionar todas las operaciones d
    - Valida que el stock actual no sea negativo
    - Muestra errores claros en el formulario
 
-### ✅ Seguridad y Roles
-- **2 usuarios requeridos:**
+### Sistema de Seguridad y Roles
+- **Usuarios del sistema:**
   1. **Administrador (admin):** Acceso completo al sistema
   2. **Vendedor (vendedor_juan):** Acceso limitado
 
 - **Restricciones del Vendedor:**
-  - ✅ Puede gestionar: Ventas, Detalle_Venta, Clientes
-  - ✅ Puede ver (solo lectura): Productos
-  - ❌ NO puede acceder a: Roles, Usuarios, Movimientos_Inventario, Nutricional, Direccion, Alertas
-  - ❌ NO puede eliminar ventas
+  - Puede gestionar: Ventas, Detalle_Venta, Clientes
+  - Puede ver (solo lectura): Productos
+  - NO puede acceder a: Roles, Usuarios, Movimientos_Inventario, Nutricional, Direccion, Alertas
+  - NO puede eliminar ventas
 
-### ✅ Soft Delete Pattern
-Todos los modelos incluyen campos `created_at`, `updated_at` y `deleted_at` para mantener historial.
+### Patrón de Auditoría
+Todos los modelos incluyen campos `created_at`, `updated_at` y `deleted_at` para mantener historial de cambios.
 
 ---
 
-## 🛠️ Requisitos del Sistema
+## Requisitos del Sistema
 
 - **Python:** 3.8 o superior
 - **MySQL:** 5.7 o superior (WAMP/XAMPP compatible)
@@ -77,27 +78,21 @@ Todos los modelos incluyen campos `created_at`, `updated_at` y `deleted_at` para
 
 ---
 
-## 📦 Instalación
+## Instalación
 
 ### 1. Clonar el repositorio
 
 ```bash
-git clone https://github.com/Nina9114/forneria_project.git
+git clone https://github.com/TU_USUARIO/forneria_project.git
 cd forneria_project
 ```
 
 ### 2. Crear y activar entorno virtual
 
-#### En Git Bash (Windows):
+#### En Windows:
 ```bash
-python -m venv venv
-source venv/Scripts/activate
-```
-
-#### En CMD (Windows):
-```cmd
-python -m venv venv
-venv\Scripts\activate
+py -m venv venv
+.\venv\Scripts\Activate.ps1
 ```
 
 #### En Linux/Mac:
@@ -427,9 +422,9 @@ python manage.py migrate --fake-initial
 
 ---
 
-## 📝 Diagrama ER
+## Diagrama ER
 
-El diagrama Entidad-Relación debe incluir:
+El diagrama Entidad-Relación incluye:
 
 - **11 tablas** con nombres en inglés
 - **Tipos de datos:** INT, VARCHAR(length), DECIMAL(10,2), DATE, TIMESTAMP
@@ -438,15 +433,9 @@ El diagrama Entidad-Relación debe incluir:
 - **Campos especiales:** created_at, updated_at, deleted_at
 - **Cardinalidad:** 1:N, N:1
 
-**Herramientas recomendadas:**
-- MySQL Workbench (Reverse Engineer)
-- Draw.io
-- Lucidchart
-- dbdiagram.io
-
 ---
 
-## 📚 Tecnologías Utilizadas
+## Tecnologías Utilizadas
 
 - **Backend:** Django 4.2.7
 - **Base de Datos:** MySQL 5.7+
@@ -457,42 +446,19 @@ El diagrama Entidad-Relación debe incluir:
 
 ---
 
-## ✅ Cumplimiento de Rúbrica
+## Contacto
 
-| Criterio | Puntaje | Estado |
-|----------|---------|--------|
-| Conexión BD + Migraciones | 9 pts | ✅ MySQL con .env |
-| Admin Básico | 10 pts | ✅ 11 modelos configurados |
-| Admin Pro | 22 pts | ✅ Inline + Acción + Validación |
-| Seguridad (scoping/rol) | 15 pts | ✅ 2 usuarios con restricciones |
-| Informe escrito | 15 pts | ✅ Documentación completa |
-| Revisión en vivo | 20 pts | ✅ Proyecto funcional |
-| **TOTAL** | **91 pts** | ✅ |
+**Institución:** INACAP  
+**Asignatura:** Desarrollo de Aplicaciones Web  
+**Tecnologías:** Django, MySQL, Python
 
 ---
 
-## 📞 Contacto
+## Licencia
 
-**Estudiante:** Nina9114  
-**GitHub:** https://github.com/Nina9114  
-**Email:** (tu email)
+Proyecto académico - INACAP
 
 ---
 
-## 📄 Licencia
-
-Proyecto académico - Duoc UC  
-Evaluación Sumativa II - Programación Web
-
----
-
-## 🙏 Agradecimientos
-
-- Duoc UC - Escuela de Informática y Telecomunicaciones
-- Docente del ramo
-- Comunidad Django
-
----
-
-**Última actualización:** Octubre 2025
+**Última actualización:** Octubre 2024
 
