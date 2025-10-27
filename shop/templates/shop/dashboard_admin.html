@@ -1,0 +1,61 @@
+{% extends 'shop/base.html' %}
+
+{% block title %}Dashboard Administrador - Fornería{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h1>📊 Dashboard Administrador</h1>
+        <p class="text-muted">Panel de control completo del sistema</p>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-3">
+        <div class="card bg-primary text-white">
+            <div class="card-body">
+                <h5 class="card-title">Productos</h5>
+                <h2>{{ total_productos }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-success text-white">
+            <div class="card-body">
+                <h5 class="card-title">Clientes</h5>
+                <h2>{{ total_clientes }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-info text-white">
+            <div class="card-body">
+                <h5 class="card-title">Ventas Hoy</h5>
+                <h2>{{ ventas_hoy }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-warning text-white">
+            <div class="card-body">
+                <h5 class="card-title">Alertas</h5>
+                <h2>{{ alertas_pendientes }}</h2>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5>🔗 Enlaces Rápidos</h5>
+            </div>
+            <div class="card-body">
+                <a href="/admin/" class="btn btn-outline-primary me-2">Django Admin</a>
+                <a href="{% url 'forneria:session_info' %}" class="btn btn-outline-info me-2">Info Sesión</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
