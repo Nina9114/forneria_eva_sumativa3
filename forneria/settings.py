@@ -135,3 +135,23 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 LOGIN_URL = '/admin/login/'
 LOGIN_REDIRECT_URL = '/admin/'
 LOGOUT_REDIRECT_URL = '/admin/'
+
+# ============= CONFIGURACIÓN DE SESIONES =============
+# Duración de la cookie de sesión (en segundos)
+SESSION_COOKIE_AGE = 60 * 60 * 2  # 2 horas
+SESSION_EXPIRE_AT_BROWSER_CLOSE = False
+SESSION_SAVE_EVERY_REQUEST = False
+
+# Seguridad de las cookies
+SESSION_COOKIE_SECURE = False  # True en producción con HTTPS
+SESSION_COOKIE_SAMESITE = 'Lax'  # Protección CSRF
+
+# Configuración de mensajes
+from django.contrib.messages import constants as msg
+MESSAGE_TAGS = {
+    msg.DEBUG: 'debug',
+    msg.INFO: 'info',
+    msg.SUCCESS: 'success',
+    msg.WARNING: 'warning',
+    msg.ERROR: 'danger',
+}
