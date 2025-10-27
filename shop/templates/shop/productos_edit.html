@@ -1,0 +1,214 @@
+{% extends 'shop/base.html' %}
+
+{% block title %}Editar Producto - Fornería{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1>✏️ Editar Producto: {{ producto.nombre }}</h1>
+            <div>
+                <a href="{% url 'forneria:productos_detail' producto.id %}" class="btn btn-outline-info me-2">
+                    <i class="fas fa-eye"></i> Ver Detalles
+                </a>
+                <a href="{% url 'forneria:productos_list' %}" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left"></i> Volver a Lista
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5>Información del Producto</h5>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="nombre" class="form-label">Nombre *</label>
+                                <input type="text" class="form-control" id="nombre" name="nombre" 
+                                       value="{{ producto.nombre }}" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="marca" class="form-label">Marca</label>
+                                <input type="text" class="form-control" id="marca" name="marca" 
+                                       value="{{ producto.marca|default:'' }}">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="descripcion" class="form-label">Descripción</label>
+                        <textarea class="form-control" id="descripcion" name="descripcion" rows="3">{{ producto.descripcion|default:'' }}</textarea>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="precio" class="form-label">Precio *</label>
+                                <input type="number" class="form-control" id="precio" name="precio" 
+                                       value="{{ producto.precio }}" step="0.01" min="0" required>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="categoria" class="form-label">Categoría *</label>
+                                <select class="form-select" id="categoria" name="categoria" required>
+                                    <option value="">Seleccionar categoría</option>
+                                    {% for categoria in categorias %}
+                                    <option value="{{ categoria.id }}" 
+                                            {% if categoria.id == producto.Categorias_id.id %}selected{% endif %}>
+                                        {{ categoria.nombre }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="tipo" class="form-label">Tipo *</label>
+                                <select class="form-select" id="tipo" name="tipo" required>
+                                    <option value="">Seleccionar tipo</option>
+                                    {% for tipo in tipos %}
+                                    <option value="{{ tipo }}" 
+                                            {% if tipo == producto.tipo %}selected{% endif %}>
+                                        {{ tipo|title }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="caducidad" class="form-label">Fecha de Caducidad *</label>
+                                <input type="date" class="form-control" id="caducidad" name="caducidad" 
+                                       value="{{ producto.caducidad|date:'Y-m-d' }}" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="elaboracion" class="form-label">Fecha de Elaboración</label>
+                                <input type="date" class="form-control" id="elaboracion" name="elaboracion" 
+                                       value="{% if producto.elaboracion %}{{ producto.elaboracion|date:'Y-m-d' }}{% endif %}">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="stock_actual" class="form-label">Stock Actual</label>
+                                <input type="number" class="form-control" id="stock_actual" name="stock_actual" 
+                                       value="{{ producto.stock_actual|default:0 }}" min="0">
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="stock_minimo" class="form-label">Stock Mínimo</label>
+                                <input type="number" class="form-control" id="stock_minimo" name="stock_minimo" 
+                                       value="{{ producto.stock_minimo|default:5 }}" min="0">
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="stock_maximo" class="form-label">Stock Máximo</label>
+                                <input type="number" class="form-control" id="stock_maximo" name="stock_maximo" 
+                                       value="{{ producto.stock_maximo|default:100 }}" min="0">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="presentacion" class="form-label">Presentación</label>
+                                <input type="text" class="form-control" id="presentacion" name="presentacion" 
+                                       value="{{ producto.presentacion|default:'' }}"
+                                       placeholder="Ej: Bolsa, Caja, Unidad">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="formato" class="form-label">Formato</label>
+                                <input type="text" class="form-control" id="formato" name="formato" 
+                                       value="{{ producto.formato|default:'' }}"
+                                       placeholder="Ej: 500g, 1kg, 12 unidades">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-between">
+                        <a href="{% url 'forneria:productos_detail' producto.id %}" class="btn btn-secondary">
+                            Cancelar
+                        </a>
+                        <button type="submit" class="btn btn-warning">
+                            <i class="fas fa-save"></i> Actualizar Producto
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h6>📊 Información Actual</h6>
+            </div>
+            <div class="card-body">
+                <table class="table table-sm">
+                    <tr>
+                        <th>ID:</th>
+                        <td>{{ producto.id }}</td>
+                    </tr>
+                    <tr>
+                        <th>Creado:</th>
+                        <td>{{ producto.creado|date:"d/m/Y H:i" }}</td>
+                    </tr>
+                    <tr>
+                        <th>Modificado:</th>
+                        <td>{{ producto.modificado|date:"d/m/Y H:i" }}</td>
+                    </tr>
+                    <tr>
+                        <th>Estado Stock:</th>
+                        <td>
+                            {% if producto.stock_actual <= producto.stock_minimo %}
+                                <span class="badge bg-danger">Bajo</span>
+                            {% elif producto.stock_actual >= producto.stock_maximo %}
+                                <span class="badge bg-success">Alto</span>
+                            {% else %}
+                                <span class="badge bg-warning">Normal</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+        
+        <div class="card mt-3">
+            <div class="card-header">
+                <h6>⚠️ Validaciones</h6>
+            </div>
+            <div class="card-body">
+                <ul class="list-unstyled small">
+                    <li><i class="fas fa-check text-success"></i> Caducidad > Elaboración</li>
+                    <li><i class="fas fa-check text-success"></i> Stock mínimo < Stock máximo</li>
+                    <li><i class="fas fa-check text-success"></i> Stock actual ≥ 0</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
