@@ -624,3 +624,11 @@ class Command(BaseCommand):
         self.stdout.write('\n' + self.style.SUCCESS('🚀 Para iniciar el servidor: python manage.py runserver'))
         self.stdout.write(self.style.SUCCESS('🌐 Acceder al admin: http://127.0.0.1:8000/admin/\n'))
 
+
+
+
+
+
+
+
+

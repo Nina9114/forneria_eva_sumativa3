@@ -6,3 +6,11 @@ class ShopConfig(AppConfig):
     name = 'shop'
     verbose_name = 'Gestión de Fornería'
 
+
+
+
+
+
+
+
+
