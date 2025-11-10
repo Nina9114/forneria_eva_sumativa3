@@ -1,180 +1,243 @@
 {% extends 'shop/base.html' %}
+{% load static %}
 
-{% block title %}Lista de Productos - Fornería{% endblock %}
+{% block title %}Productos | Fornería{% endblock %}
 
 {% block content %}
-<div class="row">
-    <div class="col-12">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h1>🍞 Lista de Productos</h1>
+<div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3 mb-4">
+    <div>
+        <h1 class="h3 mb-0">Inventario de productos</h1>
+        <p class="text-muted mb-0">{{ total_resultados }} resultados</p>
+    </div>
+    <div class="d-flex gap-2 flex-wrap">
+        <a class="btn btn-outline-success" href="{{ export_url }}">
+            <i class="fas fa-file-excel me-1"></i> Exportar Excel
+        </a>
+        {% if user_can_add %}
+        <a class="btn btn-primary" href="{% url 'forneria:productos_create' %}">
+            <i class="fas fa-plus me-1"></i> Nuevo producto
+        </a>
+        {% endif %}
+    </div>
+</div>
+
+<form method="get" class="card shadow-sm mb-4">
+    <div class="card-body">
+        <input type="hidden" name="order" value="{{ order_param }}">
+        <div class="row g-3">
+            <div class="col-sm-6 col-lg-4">
+                <label for="search" class="form-label">Buscar</label>
+                <input id="search" name="search" class="form-control" value="{{ search }}"
+                       placeholder="Nombre, marca, descripción">
+            </div>
+            <div class="col-sm-6 col-lg-3">
+                <label for="categoria" class="form-label">Categoría</label>
+                <select id="categoria" name="categoria" class="form-select">
+                    <option value="">Todas</option>
+                    {% for categoria in categorias %}
+                    <option value="{{ categoria.id }}"{% if categoria.id == categoria_selected %} selected{% endif %}>
+                        {{ categoria.nombre }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-sm-6 col-lg-2">
+                <label for="tipo" class="form-label">Tipo</label>
+                <select id="tipo" name="tipo" class="form-select">
+                    <option value="">Todos</option>
+                    {% for item in tipos %}
+                    <option value="{{ item }}"{% if item == tipo_selected %} selected{% endif %}>
+                        {{ item|title }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-sm-6 col-lg-2">
+                <label for="per_page" class="form-label">Resultados por página</label>
+                <select id="per_page" name="per_page" class="form-select" onchange="this.form.submit()">
+                    {% for option in per_page_choices %}
+                    <option value="{{ option }}"{% if option == per_page %} selected{% endif %}>{{ option }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-12 col-lg-1 d-grid">
+                <button type="submit" class="btn btn-primary">Filtrar</button>
+            </div>
+            <div class="col-12 col-lg-1 d-grid">
+                <a href="{% url 'forneria:productos_list' %}" class="btn btn-outline-secondary">Limpiar</a>
+            </div>
+        </div>
+    </div>
+</form>
+
+<div class="card shadow-sm">
+    <div class="card-body">
+        {% if page_obj.object_list %}
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table-dark">
+                    <tr>
+                        <th scope="col">ID</th>
+                        <th scope="col" class="text-nowrap">
+                            {% if base_query %}
+                                <a class="text-white text-decoration-none" href="?{{ base_query }}&order={{ next_orders.nombre }}">
+                            {% else %}
+                                <a class="text-white text-decoration-none" href="?order={{ next_orders.nombre }}">
+                            {% endif %}
+                                Nombre
+                                {% if order_states.nombre == 'asc' %}
+                                    <i class="fas fa-sort-up ms-1"></i>
+                                {% elif order_states.nombre == 'desc' %}
+                                    <i class="fas fa-sort-down ms-1"></i>
+                                {% else %}
+                                    <i class="fas fa-sort ms-1 text-secondary"></i>
+                                {% endif %}
+                            </a>
+                        </th>
+                        <th scope="col">Marca</th>
+                        <th scope="col" class="text-nowrap text-end">
+                            {% if base_query %}
+                                <a class="text-white text-decoration-none" href="?{{ base_query }}&order={{ next_orders.precio }}">
+                            {% else %}
+                                <a class="text-white text-decoration-none" href="?order={{ next_orders.precio }}">
+                            {% endif %}
+                                Precio
+                                {% if order_states.precio == 'asc' %}
+                                    <i class="fas fa-sort-up ms-1"></i>
+                                {% elif order_states.precio == 'desc' %}
+                                    <i class="fas fa-sort-down ms-1"></i>
+                                {% else %}
+                                    <i class="fas fa-sort ms-1 text-secondary"></i>
+                                {% endif %}
+                            </a>
+                        </th>
+                        <th scope="col" class="text-center text-nowrap">
+                            {% if base_query %}
+                                <a class="text-white text-decoration-none" href="?{{ base_query }}&order={{ next_orders.stock_actual }}">
+                            {% else %}
+                                <a class="text-white text-decoration-none" href="?order={{ next_orders.stock_actual }}">
+                            {% endif %}
+                                Stock
+                                {% if order_states.stock_actual == 'asc' %}
+                                    <i class="fas fa-sort-up ms-1"></i>
+                                {% elif order_states.stock_actual == 'desc' %}
+                                    <i class="fas fa-sort-down ms-1"></i>
+                                {% else %}
+                                    <i class="fas fa-sort ms-1 text-secondary"></i>
+                                {% endif %}
+                            </a>
+                        </th>
+                        <th scope="col">Categoría</th>
+                        <th scope="col">Tipo</th>
+                        <th scope="col" class="text-nowrap">Caducidad</th>
+                        <th scope="col" class="text-nowrap">
+                            {% if base_query %}
+                                <a class="text-white text-decoration-none" href="?{{ base_query }}&order={{ next_orders.creado }}">
+                            {% else %}
+                                <a class="text-white text-decoration-none" href="?order={{ next_orders.creado }}">
+                            {% endif %}
+                                Creado
+                                {% if order_states.creado == 'asc' %}
+                                    <i class="fas fa-sort-up ms-1"></i>
+                                {% elif order_states.creado == 'desc' %}
+                                    <i class="fas fa-sort-down ms-1"></i>
+                                {% else %}
+                                    <i class="fas fa-sort ms-1 text-secondary"></i>
+                                {% endif %}
+                            </a>
+                        </th>
+                        <th scope="col" class="text-center">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for producto in page_obj %}
+                    <tr>
+                        <td>{{ producto.id }}</td>
+                        <td>
+                            <a href="{% url 'forneria:productos_detail' producto.id %}" class="text-decoration-none">
+                                {{ producto.nombre }}
+                            </a>
+                        </td>
+                        <td>{{ producto.marca|default:"-" }}</td>
+                        <td class="text-end">${{ producto.precio|floatformat:0 }}</td>
+                        <td class="text-center">
+                            <span class="badge {% if producto.stock_actual <= producto.stock_minimo %}bg-danger{% elif producto.stock_actual >= producto.stock_maximo %}bg-success{% else %}bg-warning text-dark{% endif %}">
+                                {{ producto.stock_actual|default:0 }}
+                            </span>
+                        </td>
+                        <td>{{ producto.Categorias_id.nombre }}</td>
+                        <td>{{ producto.tipo|title }}</td>
+                        <td>{{ producto.caducidad|date:"d/m/Y" }}</td>
+                        <td>{{ producto.creado|date:"d/m/Y H:i" }}</td>
+                        <td class="text-center">
+                            <div class="btn-group btn-group-sm" role="group">
+                                <a href="{% url 'forneria:productos_detail' producto.id %}" class="btn btn-outline-info" title="Ver">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                {% if user_can_change %}
+                                <a href="{% url 'forneria:productos_edit' producto.id %}" class="btn btn-outline-warning" title="Editar">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                {% endif %}
+                                {% if user_can_delete %}
+                                <form method="post" action="{% url 'forneria:productos_delete' producto.id %}" class="d-inline" id="delete-form-{{ producto.id }}-row">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                                    <button type="button" class="btn btn-outline-danger" title="Eliminar"
+                                            data-form="delete-form-{{ producto.id }}-row" data-nombre="{{ producto.nombre }}"
+                                            onclick="confirmarEliminacion(this)">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </form>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        {% if page_obj.has_other_pages %}
+        <nav aria-label="Paginación de productos">
+            <ul class="pagination justify-content-center">
+                {% if page_obj.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?{% if querystring %}{{ querystring }}&{% endif %}page=1">Primera</a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?{% if querystring %}{{ querystring }}&{% endif %}page={{ page_obj.previous_page_number }}">Anterior</a>
+                </li>
+                {% endif %}
+
+                <li class="page-item active">
+                    <span class="page-link">
+                        Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}
+                    </span>
+                </li>
+
+                {% if page_obj.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?{% if querystring %}{{ querystring }}&{% endif %}page={{ page_obj.next_page_number }}">Siguiente</a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?{% if querystring %}{{ querystring }}&{% endif %}page={{ page_obj.paginator.num_pages }}">Última</a>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+        {% endif %}
+        {% else %}
+        <div class="text-center py-5">
+            <h4 class="fw-semibold">No se encontraron productos</h4>
+            <p class="text-muted mb-4">Ajusta los filtros o crea un nuevo registro.</p>
             {% if user_can_add %}
-            <a href="{% url 'forneria:productos_create' %}" class="btn btn-success">
-                <i class="fas fa-plus"></i> Nuevo Producto
+            <a href="{% url 'forneria:productos_create' %}" class="btn btn-primary">
+                <i class="fas fa-plus me-1"></i> Crear producto
             </a>
             {% endif %}
         </div>
-    </div>
-</div>
-
-<!-- Filtros y Búsqueda -->
-<div class="row mb-4">
-    <div class="col-12">
-        <div class="card">
-            <div class="card-body">
-                <form method="get" class="row g-3">
-                    <div class="col-md-4">
-                        <label for="search" class="form-label">Buscar</label>
-                        <input type="text" class="form-control" id="search" name="search" 
-                               value="{{ search }}" placeholder="Nombre, marca o descripción">
-                    </div>
-                    <div class="col-md-3">
-                        <label for="categoria" class="form-label">Categoría</label>
-                        <select class="form-select" id="categoria" name="categoria">
-                            <option value="">Todas las categorías</option>
-                            {% for categoria in categorias %}
-                            <option value="{{ categoria.id }}" 
-                                    {% if categoria.id|stringformat:"s" == categoria_selected %}selected{% endif %}>
-                                {{ categoria.nombre }}
-                            </option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    <div class="col-md-3">
-                        <label for="tipo" class="form-label">Tipo</label>
-                        <select class="form-select" id="tipo" name="tipo">
-                            <option value="">Todos los tipos</option>
-                            {% for tipo in tipos %}
-                            <option value="{{ tipo }}" 
-                                    {% if tipo == tipo_selected %}selected{% endif %}>
-                                {{ tipo|title }}
-                            </option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    <div class="col-md-2 d-flex align-items-end">
-                        <button type="submit" class="btn btn-primary me-2">Filtrar</button>
-                        <a href="{% url 'forneria:productos_list' %}" class="btn btn-outline-secondary">Limpiar</a>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Tabla de Productos -->
-<div class="row">
-    <div class="col-12">
-        <div class="card">
-            <div class="card-body">
-                {% if page_obj %}
-                <div class="table-responsive">
-                    <table class="table table-striped table-hover">
-                        <thead class="table-dark">
-                            <tr>
-                                <th>ID</th>
-                                <th>Nombre</th>
-                                <th>Marca</th>
-                                <th>Precio</th>
-                                <th>Stock</th>
-                                <th>Categoría</th>
-                                <th>Tipo</th>
-                                <th>Caducidad</th>
-                                <th>Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for producto in page_obj %}
-                            <tr>
-                                <td>{{ producto.id }}</td>
-                                <td>
-                                    <a href="{% url 'forneria:productos_detail' producto.id %}" 
-                                       class="text-decoration-none">
-                                        {{ producto.nombre }}
-                                    </a>
-                                </td>
-                                <td>{{ producto.marca|default:"-" }}</td>
-                                <td>${{ producto.precio|floatformat:0 }}</td>
-                                <td>
-                                    <span class="badge {% if producto.stock_actual <= producto.stock_minimo %}bg-danger{% elif producto.stock_actual >= producto.stock_maximo %}bg-success{% else %}bg-warning{% endif %}">
-                                        {{ producto.stock_actual|default:0 }}
-                                    </span>
-                                </td>
-                                <td>{{ producto.Categorias_id.nombre }}</td>
-                                <td>
-                                    <span class="badge bg-info">{{ producto.tipo|title }}</span>
-                                </td>
-                                <td>{{ producto.caducidad|date:"d/m/Y" }}</td>
-                                <td>
-                                    <div class="btn-group" role="group">
-                                        <a href="{% url 'forneria:productos_detail' producto.id %}" 
-                                           class="btn btn-sm btn-outline-info" title="Ver detalles">
-                                            <i class="fas fa-eye"></i>
-                                        </a>
-                                        {% if user_can_change %}
-                                        <a href="{% url 'forneria:productos_edit' producto.id %}" 
-                                           class="btn btn-sm btn-outline-warning" title="Editar">
-                                            <i class="fas fa-edit"></i>
-                                        </a>
-                                        {% endif %}
-                                        {% if user_can_delete %}
-                                        <button type="button" class="btn btn-sm btn-outline-danger" 
-                                                title="Eliminar"
-                                                onclick="confirmarEliminacion('{% url 'forneria:productos_delete' producto.id %}', '{{ producto.nombre }}')">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
-                                        {% endif %}
-                                    </div>
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-
-                <!-- Paginación -->
-                {% if page_obj.has_other_pages %}
-                <nav aria-label="Paginación de productos">
-                    <ul class="pagination justify-content-center">
-                        {% if page_obj.has_previous %}
-                        <li class="page-item">
-                            <a class="page-link" href="?page=1{% if search %}&search={{ search }}{% endif %}{% if categoria_selected %}&categoria={{ categoria_selected }}{% endif %}{% if tipo_selected %}&tipo={{ tipo_selected }}{% endif %}">Primera</a>
-                        </li>
-                        <li class="page-item">
-                            <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if search %}&search={{ search }}{% endif %}{% if categoria_selected %}&categoria={{ categoria_selected }}{% endif %}{% if tipo_selected %}&tipo={{ tipo_selected }}{% endif %}">Anterior</a>
-                        </li>
-                        {% endif %}
-
-                        <li class="page-item active">
-                            <span class="page-link">
-                                Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}
-                            </span>
-                        </li>
-
-                        {% if page_obj.has_next %}
-                        <li class="page-item">
-                            <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if search %}&search={{ search }}{% endif %}{% if categoria_selected %}&categoria={{ categoria_selected }}{% endif %}{% if tipo_selected %}&tipo={{ tipo_selected }}{% endif %}">Siguiente</a>
-                        </li>
-                        <li class="page-item">
-                            <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if search %}&search={{ search }}{% endif %}{% if categoria_selected %}&categoria={{ categoria_selected }}{% endif %}{% if tipo_selected %}&tipo={{ tipo_selected }}{% endif %}">Última</a>
-                        </li>
-                        {% endif %}
-                    </ul>
-                </nav>
-                {% endif %}
-
-                {% else %}
-                <div class="text-center py-5">
-                    <h4>No se encontraron productos</h4>
-                    <p class="text-muted">Intenta ajustar los filtros de búsqueda</p>
-                    {% if user_can_add %}
-                    <a href="{% url 'forneria:productos_create' %}" class="btn btn-success">
-                        <i class="fas fa-plus"></i> Crear Primer Producto
-                    </a>
-                    {% endif %}
-                </div>
-                {% endif %}
-            </div>
-        </div>
+        {% endif %}
     </div>
 </div>
 {% endblock %}

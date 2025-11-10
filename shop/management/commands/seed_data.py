@@ -10,6 +10,7 @@ from django.contrib.contenttypes.models import ContentType
 from shop.models import *
 from datetime import datetime, timedelta
 from decimal import Decimal
+from django.db.models import Q
 
 
 class Command(BaseCommand):
@@ -321,35 +322,47 @@ class Command(BaseCommand):
         # 6. Clientes
         self.stdout.write('👤 Creando clientes...')
         clientes = [
-            Clientes.objects.create(
+            Clientes.objects.get_or_create(
                 rut='12345678-9',
-                nombre='Juan Pérez García',
-                correo='juan.perez@email.com'
-            ),
-            Clientes.objects.create(
+                defaults={
+                    'nombre': 'Juan Pérez García',
+                    'correo': 'juan.perez@email.com'
+                }
+            )[0],
+            Clientes.objects.get_or_create(
                 rut='98765432-1',
-                nombre='María González López',
-                correo='maria.gonzalez@email.com'
-            ),
-            Clientes.objects.create(
+                defaults={
+                    'nombre': 'María González López',
+                    'correo': 'maria.gonzalez@email.com'
+                }
+            )[0],
+            Clientes.objects.get_or_create(
                 rut='11223344-5',
-                nombre='Pedro Rodríguez Silva',
-                correo='pedro.rodriguez@email.com'
-            ),
-            Clientes.objects.create(
+                defaults={
+                    'nombre': 'Pedro Rodríguez Silva',
+                    'correo': 'pedro.rodriguez@email.com'
+                }
+            )[0],
+            Clientes.objects.get_or_create(
                 rut='55667788-9',
-                nombre='Ana Martínez Fernández',
-                correo='ana.martinez@email.com'
-            ),
-            Clientes.objects.create(
+                defaults={
+                    'nombre': 'Ana Martínez Fernández',
+                    'correo': 'ana.martinez@email.com'
+                }
+            )[0],
+            Clientes.objects.get_or_create(
                 nombre='Cliente Genérico',
-                correo='cliente@forneria.cl'
-            ),
+                defaults={
+                    'correo': 'cliente@forneria.cl'
+                }
+            )[0],
         ]
         self.stdout.write(self.style.SUCCESS(f'   ✓ {len(clientes)} clientes creados\n'))
 
         # 7. Ventas con Detalle
         self.stdout.write('🛒 Creando ventas...')
+        Ventas.objects.all().delete()
+        Detalle_Venta.objects.all().delete()
         
         # Venta 1
         venta1 = Ventas.objects.create(
@@ -492,6 +505,7 @@ class Command(BaseCommand):
 
         # 9. Alertas
         self.stdout.write('⚠️  Creando alertas...')
+        Alertas.objects.all().delete()
         Alertas.objects.create(
             producto_id=productos[3],  # Torta chocolate (stock bajo)
             tipo_alerta='Stock bajo',
@@ -511,124 +525,96 @@ class Command(BaseCommand):
 
         # 10. Usuarios del sistema
         self.stdout.write('👨‍💼 Creando usuarios del sistema...')
-        Usuarios.objects.create(
-            nombres='Carlos',
-            paterno='Muñoz',
-            materno='Soto',
+        Usuarios.objects.update_or_create(
             run='15678234-5',
-            correo='carlos.munoz@forneria.cl',
-            fono='+56912345678',
-            Direccion_id=dir1,
-            Roles_id=rol_vendedor
-        )
-        Usuarios.objects.create(
-            nombres='Roberto',
-            paterno='Lagos',
-            materno='Escobar',
-            run='16789345-6',
-            correo='roberto.lagos@forneria.cl',
-            fono='+56987654321',
-            Direccion_id=dir2,
-            Roles_id=rol_admin
-        )
-        self.stdout.write(self.style.SUCCESS('   ✓ 2 usuarios del sistema creados\n'))
-
-        # 11. Crear grupo Vendedor con permisos limitados
-        self.stdout.write('🔐 Configurando permisos de seguridad...')
-        vendedor_group, created = Group.objects.get_or_create(name='Vendedor')
-        
-        if created or vendedor_group.permissions.count() == 0:
-            # Limpiar permisos existentes
-            vendedor_group.permissions.clear()
-            
-            # Permisos para Ventas (ver, agregar, cambiar - NO eliminar)
-            ct_ventas = ContentType.objects.get_for_model(Ventas)
-            permisos_ventas = Permission.objects.filter(
-                content_type=ct_ventas
-            ).exclude(codename='delete_ventas')
-            vendedor_group.permissions.add(*permisos_ventas)
-            
-            # Permisos completos para Detalle_Venta
-            ct_detalle = ContentType.objects.get_for_model(Detalle_Venta)
-            permisos_detalle = Permission.objects.filter(content_type=ct_detalle)
-            vendedor_group.permissions.add(*permisos_detalle)
-            
-            # Permisos completos para Clientes
-            ct_clientes = ContentType.objects.get_for_model(Clientes)
-            permisos_clientes = Permission.objects.filter(content_type=ct_clientes)
-            vendedor_group.permissions.add(*permisos_clientes)
-            
-            # Permiso de solo lectura para Productos
-            ct_productos = ContentType.objects.get_for_model(Productos)
-            perm_view_productos = Permission.objects.get(
-                content_type=ct_productos,
-                codename='view_productos'
-            )
-            vendedor_group.permissions.add(perm_view_productos)
-            
-            self.stdout.write(self.style.SUCCESS('   ✓ Grupo "Vendedor" configurado con permisos limitados'))
-        else:
-            self.stdout.write(self.style.SUCCESS('   ✓ Grupo "Vendedor" ya existe'))
-
-        # 12. Crear usuario Django para vendedor
-        vendedor_user, created = User.objects.get_or_create(
-            username='vendedor_juan',
             defaults={
-                'email': 'vendedor@forneria.cl',
-                'first_name': 'Juan',
-                'last_name': 'Vendedor',
-                'is_staff': True,
-                'is_superuser': False
+                'nombres': 'Carlos',
+                'paterno': 'Muñoz',
+                'materno': 'Soto',
+                'correo': 'carlos.munoz@forneria.cl',
+                'fono': '+56912345678',
+                'Direccion_id': dir1,
+                'Roles_id': rol_vendedor,
             }
         )
-        
-        if created:
-            vendedor_user.set_password('vendedor123')
-            vendedor_user.save()
-            vendedor_user.groups.add(vendedor_group)
-            self.stdout.write(self.style.SUCCESS('   ✓ Usuario "vendedor_juan" creado'))
-        else:
-            # Asegurarse de que tenga el grupo
-            if not vendedor_user.groups.filter(name='Vendedor').exists():
-                vendedor_user.groups.add(vendedor_group)
-            self.stdout.write(self.style.SUCCESS('   ✓ Usuario "vendedor_juan" ya existe'))
+        Usuarios.objects.update_or_create(
+            run='16789345-6',
+            defaults={
+                'nombres': 'Roberto',
+                'paterno': 'Lagos',
+                'materno': 'Escobar',
+                'correo': 'roberto.lagos@forneria.cl',
+                'fono': '+56987654321',
+                'Direccion_id': dir2,
+                'Roles_id': rol_admin,
+            }
+        )
+        self.stdout.write(self.style.SUCCESS('   ✓ Usuarios del sistema listos\n'))
+        # 11. Configurar grupos y permisos según la EVA
+        self.stdout.write('🔐 Configurando permisos de seguridad...')
 
-        # Resumen final
+        for group_name in ['Administrador', 'Editor', 'Lector']:
+            Group.objects.filter(name=group_name).delete()
+
+        admin_group = Group.objects.create(name='Administrador')
+        editor_group = Group.objects.create(name='Editor')
+        lector_group = Group.objects.create(name='Lector')
+
+        ct_productos = ContentType.objects.get_for_model(Productos)
+        ct_clientes = ContentType.objects.get_for_model(Clientes)
+        ct_ventas = ContentType.objects.get_for_model(Ventas)
+
+        admin_perms = Permission.objects.filter(content_type__in=[ct_productos, ct_clientes, ct_ventas])
+        admin_group.permissions.add(*admin_perms)
+
+        editor_perms = Permission.objects.filter(
+            Q(content_type=ct_productos, codename__in=['add_productos', 'change_productos', 'view_productos']) |
+            Q(content_type=ct_ventas, codename__in=['add_ventas', 'change_ventas', 'view_ventas']) |
+            Q(content_type=ct_clientes, codename='view_clientes')
+        )
+        editor_group.permissions.add(*editor_perms)
+
+        lector_perms = Permission.objects.filter(
+            Q(content_type=ct_productos, codename='view_productos') |
+            Q(content_type=ct_clientes, codename='view_clientes') |
+            Q(content_type=ct_ventas, codename='view_ventas')
+        )
+        lector_group.permissions.add(*lector_perms)
+
+        self.stdout.write(self.style.SUCCESS('   ✓ Grupos Administrador, Editor y Lector configurados'))
+
+        # 12. Usuarios demo para probar permisos
+        editor_user, created = User.objects.get_or_create(
+            username='editor_maria',
+            defaults={
+                'email': 'editor@forneria.cl',
+                'first_name': 'María',
+                'is_staff': True,
+                'is_superuser': False,
+            }
+        )
+        if created:
+            editor_user.set_password('Editor123!')
+            editor_user.save()
+        editor_user.groups.set([editor_group])
+
+        lector_user, created = User.objects.get_or_create(
+            username='lector_pedro',
+            defaults={
+                'email': 'lector@forneria.cl',
+                'first_name': 'Pedro',
+                'is_staff': False,
+                'is_superuser': False,
+            }
+        )
+        if created:
+            lector_user.set_password('Lector123!')
+            lector_user.save()
+        lector_user.groups.set([lector_group])
+
+        self.stdout.write(self.style.SUCCESS('   ✓ Usuarios demo configurados: editor_maria (Editor), lector_pedro (Lector)'))
+
+        # Resumen final (ajusta los textos como prefieras)
         self.stdout.write('\n' + '='*60)
         self.stdout.write(self.style.SUCCESS('✅ ¡DATOS CARGADOS EXITOSAMENTE!'))
         self.stdout.write('='*60 + '\n')
-        
-        self.stdout.write(self.style.WARNING('📊 RESUMEN:'))
-        self.stdout.write(f'   • Direcciones: 3')
-        self.stdout.write(f'   • Roles: 2 (Administrador, Vendedor)')
-        self.stdout.write(f'   • Categorías: 6')
-        self.stdout.write(f'   • Info. Nutricional: 6')
-        self.stdout.write(f'   • Productos: {len(productos)}')
-        self.stdout.write(f'   • Clientes: {len(clientes)}')
-        self.stdout.write(f'   • Ventas: 5 (con detalles)')
-        self.stdout.write(f'   • Movimientos Inventario: 4')
-        self.stdout.write(f'   • Alertas: 3')
-        self.stdout.write(f'   • Usuarios Sistema: 2')
-        
-        self.stdout.write('\n' + self.style.WARNING('🔑 CREDENCIALES:'))
-        self.stdout.write(self.style.SUCCESS('   👨‍💼 Administrador:'))
-        self.stdout.write('      Usuario: admin')
-        self.stdout.write('      Password: admin123')
-        self.stdout.write('      (Crear con: python manage.py createsuperuser)')
-        
-        self.stdout.write(self.style.SUCCESS('\n   👤 Vendedor:'))
-        self.stdout.write('      Usuario: vendedor_juan')
-        self.stdout.write('      Password: vendedor123')
-        self.stdout.write('      Acceso limitado a: Ventas, Clientes, Productos (solo lectura)')
-        
-        self.stdout.write('\n' + self.style.SUCCESS('🚀 Para iniciar el servidor: python manage.py runserver'))
-        self.stdout.write(self.style.SUCCESS('🌐 Acceder al admin: http://127.0.0.1:8000/admin/\n'))
-
-
-
-
-
-
-
-
-

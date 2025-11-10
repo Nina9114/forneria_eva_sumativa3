@@ -1,0 +1,68 @@
+{% extends 'shop/base.html' %}
+{% load static %}
+
+{% block title %}Mi Perfil - Fornería{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12 col-lg-8 mx-auto">
+        <div class="card shadow-sm">
+            <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+                <h1 class="h4 mb-0">👤 Mi Perfil</h1>
+                <a class="btn btn-outline-light btn-sm" href="{% url 'forneria:dashboard_admin' %}">Volver</a>
+            </div>
+            <div class="card-body">
+                <form method="post" enctype="multipart/form-data" novalidate>
+                    {% csrf_token %}
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h5 class="text-muted">Datos de la cuenta</h5>
+                            {{ user_form.non_field_errors }}
+                            <div class="mb-3">
+                                <label class="form-label">Nombre</label>
+                                {{ user_form.first_name }}
+                                {{ user_form.first_name.errors }}
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Apellido</label>
+                                {{ user_form.last_name }}
+                                {{ user_form.last_name.errors }}
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Correo electrónico</label>
+                                {{ user_form.email }}
+                                {{ user_form.email.errors }}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <h5 class="text-muted">Perfil</h5>
+                            {{ profile_form.non_field_errors }}
+                            <div class="mb-3">
+                                <label class="form-label">Teléfono</label>
+                                {{ profile_form.phone }}
+                                {{ profile_form.phone.errors }}
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Avatar</label>
+                                {{ profile_form.avatar }}
+                                {{ profile_form.avatar.errors }}
+                                {% if profile.avatar %}
+                                    <div class="mt-3">
+                                        <img src="{{ profile.avatar.url }}" alt="Avatar actual" class="img-thumbnail" style="max-width: 150px;">
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-end gap-2">
+                        <a class="btn btn-outline-secondary" href="{% url 'forneria:dashboard_admin' %}">Cancelar</a>
+                        <button type="submit" class="btn btn-primary">Guardar cambios</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

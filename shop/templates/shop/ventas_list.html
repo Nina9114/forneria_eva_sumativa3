@@ -1,0 +1,194 @@
+{% extends 'shop/base.html' %}
+{% load static %}
+
+{% block title %}Ventas | Fornería{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3 mb-4">
+    <div>
+        <h1 class="h3 mb-0">Registro de ventas</h1>
+        <p class="text-muted mb-0">{{ total_resultados }} resultados encontrados</p>
+    </div>
+    <div class="d-flex gap-2 flex-wrap">
+        <a class="btn btn-outline-success" href="{{ export_url }}">
+            <i class="fas fa-file-excel me-1"></i> Exportar Excel
+        </a>
+        {% if user_can_add %}
+        <a class="btn btn-primary" href="{% url 'forneria:ventas_create' %}">
+            <i class="fas fa-plus me-1"></i> Nueva venta
+        </a>
+        {% endif %}
+    </div>
+</div>
+
+<form method="get" class="card shadow-sm mb-4">
+    <div class="card-body">
+        <input type="hidden" name="order" value="{{ order_param }}">
+        <div class="row g-3">
+            <div class="col-md-4 col-lg-3">
+                <label for="search" class="form-label">Buscar</label>
+                <input id="search" name="search" class="form-control" value="{{ search }}"
+                       placeholder="Folio o cliente">
+            </div>
+            <div class="col-md-4 col-lg-3">
+                <label for="canal" class="form-label">Canal</label>
+                <select id="canal" name="canal" class="form-select">
+                    <option value="">Todos</option>
+                    {% for value, label in canal_choices %}
+                    <option value="{{ value }}"{% if value == canal_selected %} selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-4 col-lg-2">
+                <label class="form-label" for="fecha_inicio">Desde</label>
+                <input type="date" id="fecha_inicio" name="fecha_inicio" class="form-control" value="{{ fecha_inicio }}">
+            </div>
+            <div class="col-md-4 col-lg-2">
+                <label class="form-label" for="fecha_fin">Hasta</label>
+                <input type="date" id="fecha_fin" name="fecha_fin" class="form-control" value="{{ fecha_fin }}">
+            </div>
+            <div class="col-md-4 col-lg-1">
+                <label class="form-label" for="per_page">Por página</label>
+                <select id="per_page" name="per_page" class="form-select" onchange="this.form.submit()">
+                    {% for option in per_page_choices %}
+                    <option value="{{ option }}"{% if option == per_page %} selected{% endif %}>{{ option }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-12 col-lg-1 d-grid">
+                <button type="submit" class="btn btn-primary">Filtrar</button>
+            </div>
+            <div class="col-12 col-lg-1 d-grid">
+                <a href="{% url 'forneria:ventas_list' %}" class="btn btn-outline-secondary">Limpiar</a>
+            </div>
+        </div>
+    </div>
+</form>
+
+<div class="card shadow-sm">
+    <div class="card-body">
+        {% if page_obj.object_list %}
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table-dark">
+                    <tr>
+                        <th scope="col">ID</th>
+                        <th scope="col">Folio</th>
+                        <th scope="col">
+                            {% if base_query %}
+                            <a class="text-white text-decoration-none" href="?{{ base_query }}&order={{ next_orders.fecha }}">
+                            {% else %}
+                            <a class="text-white text-decoration-none" href="?order={{ next_orders.fecha }}">
+                            {% endif %}
+                                Fecha
+                                {% if order_states.fecha == 'asc' %}
+                                    <i class="fas fa-sort-up ms-1"></i>
+                                {% elif order_states.fecha == 'desc' %}
+                                    <i class="fas fa-sort-down ms-1"></i>
+                                {% else %}
+                                    <i class="fas fa-sort ms-1 text-secondary"></i>
+                                {% endif %}
+                            </a>
+                        </th>
+                        <th scope="col">Cliente</th>
+                        <th scope="col">Canal</th>
+                        <th scope="col" class="text-end">
+                            {% if base_query %}
+                            <a class="text-white text-decoration-none" href="?{{ base_query }}&order={{ next_orders.total_con_iva }}">
+                            {% else %}
+                            <a class="text-white text-decoration-none" href="?order={{ next_orders.total_con_iva }}">
+                            {% endif %}
+                                Total con IVA
+                                {% if order_states.total_con_iva == 'asc' %}
+                                    <i class="fas fa-sort-up ms-1"></i>
+                                {% elif order_states.total_con_iva == 'desc' %}
+                                    <i class="fas fa-sort-down ms-1"></i>
+                                {% else %}
+                                    <i class="fas fa-sort ms-1 text-secondary"></i>
+                                {% endif %}
+                            </a>
+                        </th>
+                        <th scope="col" class="text-end">Pagado</th>
+                        <th scope="col" class="text-center">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for venta in page_obj %}
+                    <tr>
+                        <td>{{ venta.id }}</td>
+                        <td>{{ venta.folio|default:'-' }}</td>
+                        <td>{{ venta.fecha|date:"d/m/Y H:i" }}</td>
+                        <td>{{ venta.cliente_id.nombre }}</td>
+                        <td>{{ venta.get_canal_venta_display }}</td>
+                        <td class="text-end">${{ venta.total_con_iva|floatformat:0 }}</td>
+                        <td class="text-end">${{ venta.monto_pagado|floatformat:0 }}</td>
+                        <td class="text-center">
+                            <div class="btn-group btn-group-sm" role="group">
+                                <a href="{% url 'forneria:ventas_detail' venta.id %}" class="btn btn-outline-info" title="Ver">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                {% if user_can_change %}
+                                <a href="{% url 'forneria:ventas_edit' venta.id %}" class="btn btn-outline-warning" title="Editar">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                {% endif %}
+                                {% if user_can_delete %}
+                                <form method="post" action="{% url 'forneria:ventas_delete' venta.id %}" class="d-inline" id="delete-form-venta-{{ venta.id }}">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                                    <button type="button" class="btn btn-outline-danger" title="Eliminar"
+                                            data-form="delete-form-venta-{{ venta.id }}" data-nombre="Venta {{ venta.folio|default:venta.id }}"
+                                            onclick="confirmarEliminacion(this)">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </form>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        {% if page_obj.has_other_pages %}
+        <nav aria-label="Paginación de ventas">
+            <ul class="pagination justify-content-center">
+                {% if page_obj.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?{% if querystring %}{{ querystring }}&{% endif %}page=1">Primera</a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?{% if querystring %}{{ querystring }}&{% endif %}page={{ page_obj.previous_page_number }}">Anterior</a>
+                </li>
+                {% endif %}
+
+                <li class="page-item active">
+                    <span class="page-link">Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+                </li>
+
+                {% if page_obj.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?{% if querystring %}{{ querystring }}&{% endif %}page={{ page_obj.next_page_number }}">Siguiente</a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?{% if querystring %}{{ querystring }}&{% endif %}page={{ page_obj.paginator.num_pages }}">Última</a>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+        {% endif %}
+        {% else %}
+        <div class="text-center py-5">
+            <h4 class="fw-semibold">No se encontraron ventas</h4>
+            <p class="text-muted mb-4">Ajusta los filtros o registra una nueva venta.</p>
+            {% if user_can_add %}
+            <a href="{% url 'forneria:ventas_create' %}" class="btn btn-primary">
+                <i class="fas fa-plus me-1"></i> Registrar venta
+            </a>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

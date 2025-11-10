@@ -1,18 +1,21 @@
 {% extends 'shop/base.html' %}
 
-{% block title %}Editar Producto - Fornería{% endblock %}
+{% block title %}{{ title }} | Fornería{% endblock %}
 
 {% block content %}
 <div class="row">
     <div class="col-12">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h1>✏️ Editar Producto: {{ producto.nombre }}</h1>
+        <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center mb-4 gap-3">
             <div>
-                <a href="{% url 'forneria:productos_detail' producto.id %}" class="btn btn-outline-info me-2">
-                    <i class="fas fa-eye"></i> Ver Detalles
+                <h1 class="h4 mb-1">{{ title }}</h1>
+                <p class="text-muted mb-0">Última actualización: {{ producto.modificado|date:"d/m/Y H:i" }}</p>
+            </div>
+            <div class="d-flex gap-2">
+                <a href="{% url 'forneria:productos_detail' producto.id %}" class="btn btn-outline-info">
+                    <i class="fas fa-eye"></i> Ver ficha
                 </a>
                 <a href="{% url 'forneria:productos_list' %}" class="btn btn-outline-secondary">
-                    <i class="fas fa-arrow-left"></i> Volver a Lista
+                    <i class="fas fa-arrow-left"></i> Volver al listado
                 </a>
             </div>
         </div>
@@ -20,192 +23,157 @@
 </div>
 
 <div class="row">
-    <div class="col-md-8">
-        <div class="card">
-            <div class="card-header">
-                <h5>Información del Producto</h5>
-            </div>
+    <div class="col-lg-8">
+        <div class="card shadow-sm">
             <div class="card-body">
-                <form method="post">
+                <form method="post" novalidate>
                     {% csrf_token %}
-                    
-                    <div class="row">
+
+                    {% if form.non_field_errors %}
+                    <div class="alert alert-danger">
+                        {% for error in form.non_field_errors %}
+                            <div>{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+
+                    <div class="row g-3">
                         <div class="col-md-6">
-                            <div class="mb-3">
-                                <label for="nombre" class="form-label">Nombre *</label>
-                                <input type="text" class="form-control" id="nombre" name="nombre" 
-                                       value="{{ producto.nombre }}" required>
-                            </div>
+                            <label class="form-label">{{ form.nombre.label }}{% if form.nombre.field.required %} *{% endif %}</label>
+                            {{ form.nombre }}
+                            {% if form.nombre.errors %}
+                                <div class="invalid-feedback d-block">{{ form.nombre.errors|striptags }}</div>
+                            {% endif %}
                         </div>
                         <div class="col-md-6">
-                            <div class="mb-3">
-                                <label for="marca" class="form-label">Marca</label>
-                                <input type="text" class="form-control" id="marca" name="marca" 
-                                       value="{{ producto.marca|default:'' }}">
-                            </div>
+                            <label class="form-label">{{ form.marca.label }}</label>
+                            {{ form.marca }}
+                            {% if form.marca.errors %}
+                                <div class="invalid-feedback d-block">{{ form.marca.errors|striptags }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">{{ form.descripcion.label }}</label>
+                            {{ form.descripcion }}
+                            {% if form.descripcion.errors %}
+                                <div class="invalid-feedback d-block">{{ form.descripcion.errors|striptags }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">{{ form.precio.label }}{% if form.precio.field.required %} *{% endif %}</label>
+                            {{ form.precio }}
+                            {% if form.precio.errors %}
+                                <div class="invalid-feedback d-block">{{ form.precio.errors|striptags }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">{{ form.Categorias_id.label }}{% if form.Categorias_id.field.required %} *{% endif %}</label>
+                            {{ form.Categorias_id }}
+                            {% if form.Categorias_id.errors %}
+                                <div class="invalid-feedback d-block">{{ form.Categorias_id.errors|striptags }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">{{ form.tipo.label }}{% if form.tipo.field.required %} *{% endif %}</label>
+                            {{ form.tipo }}
+                            {% if form.tipo.errors %}
+                                <div class="invalid-feedback d-block">{{ form.tipo.errors|striptags }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">{{ form.caducidad.label }}{% if form.caducidad.field.required %} *{% endif %}</label>
+                            {{ form.caducidad }}
+                            {% if form.caducidad.errors %}
+                                <div class="invalid-feedback d-block">{{ form.caducidad.errors|striptags }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">{{ form.elaboracion.label }}</label>
+                            {{ form.elaboracion }}
+                            {% if form.elaboracion.errors %}
+                                <div class="invalid-feedback d-block">{{ form.elaboracion.errors|striptags }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">{{ form.stock_actual.label }}</label>
+                            {{ form.stock_actual }}
+                            {% if form.stock_actual.errors %}
+                                <div class="invalid-feedback d-block">{{ form.stock_actual.errors|striptags }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">{{ form.stock_minimo.label }}</label>
+                            {{ form.stock_minimo }}
+                            {% if form.stock_minimo.errors %}
+                                <div class="invalid-feedback d-block">{{ form.stock_minimo.errors|striptags }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">{{ form.stock_maximo.label }}</label>
+                            {{ form.stock_maximo }}
+                            {% if form.stock_maximo.errors %}
+                                <div class="invalid-feedback d-block">{{ form.stock_maximo.errors|striptags }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">{{ form.presentacion.label }}</label>
+                            {{ form.presentacion }}
+                            {% if form.presentacion.errors %}
+                                <div class="invalid-feedback d-block">{{ form.presentacion.errors|striptags }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">{{ form.formato.label }}</label>
+                            {{ form.formato }}
+                            {% if form.formato.errors %}
+                                <div class="invalid-feedback d-block">{{ form.formato.errors|striptags }}</div>
+                            {% endif %}
                         </div>
                     </div>
 
-                    <div class="mb-3">
-                        <label for="descripcion" class="form-label">Descripción</label>
-                        <textarea class="form-control" id="descripcion" name="descripcion" rows="3">{{ producto.descripcion|default:'' }}</textarea>
-                    </div>
-
-                    <div class="row">
-                        <div class="col-md-4">
-                            <div class="mb-3">
-                                <label for="precio" class="form-label">Precio *</label>
-                                <input type="number" class="form-control" id="precio" name="precio" 
-                                       value="{{ producto.precio }}" step="0.01" min="0" required>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="mb-3">
-                                <label for="categoria" class="form-label">Categoría *</label>
-                                <select class="form-select" id="categoria" name="categoria" required>
-                                    <option value="">Seleccionar categoría</option>
-                                    {% for categoria in categorias %}
-                                    <option value="{{ categoria.id }}" 
-                                            {% if categoria.id == producto.Categorias_id.id %}selected{% endif %}>
-                                        {{ categoria.nombre }}
-                                    </option>
-                                    {% endfor %}
-                                </select>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="mb-3">
-                                <label for="tipo" class="form-label">Tipo *</label>
-                                <select class="form-select" id="tipo" name="tipo" required>
-                                    <option value="">Seleccionar tipo</option>
-                                    {% for tipo in tipos %}
-                                    <option value="{{ tipo }}" 
-                                            {% if tipo == producto.tipo %}selected{% endif %}>
-                                        {{ tipo|title }}
-                                    </option>
-                                    {% endfor %}
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label for="caducidad" class="form-label">Fecha de Caducidad *</label>
-                                <input type="date" class="form-control" id="caducidad" name="caducidad" 
-                                       value="{{ producto.caducidad|date:'Y-m-d' }}" required>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label for="elaboracion" class="form-label">Fecha de Elaboración</label>
-                                <input type="date" class="form-control" id="elaboracion" name="elaboracion" 
-                                       value="{% if producto.elaboracion %}{{ producto.elaboracion|date:'Y-m-d' }}{% endif %}">
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="row">
-                        <div class="col-md-4">
-                            <div class="mb-3">
-                                <label for="stock_actual" class="form-label">Stock Actual</label>
-                                <input type="number" class="form-control" id="stock_actual" name="stock_actual" 
-                                       value="{{ producto.stock_actual|default:0 }}" min="0">
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="mb-3">
-                                <label for="stock_minimo" class="form-label">Stock Mínimo</label>
-                                <input type="number" class="form-control" id="stock_minimo" name="stock_minimo" 
-                                       value="{{ producto.stock_minimo|default:5 }}" min="0">
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="mb-3">
-                                <label for="stock_maximo" class="form-label">Stock Máximo</label>
-                                <input type="number" class="form-control" id="stock_maximo" name="stock_maximo" 
-                                       value="{{ producto.stock_maximo|default:100 }}" min="0">
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label for="presentacion" class="form-label">Presentación</label>
-                                <input type="text" class="form-control" id="presentacion" name="presentacion" 
-                                       value="{{ producto.presentacion|default:'' }}"
-                                       placeholder="Ej: Bolsa, Caja, Unidad">
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label for="formato" class="form-label">Formato</label>
-                                <input type="text" class="form-control" id="formato" name="formato" 
-                                       value="{{ producto.formato|default:'' }}"
-                                       placeholder="Ej: 500g, 1kg, 12 unidades">
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="d-flex justify-content-between">
-                        <a href="{% url 'forneria:productos_detail' producto.id %}" class="btn btn-secondary">
-                            Cancelar
-                        </a>
-                        <button type="submit" class="btn btn-warning">
-                            <i class="fas fa-save"></i> Actualizar Producto
+                    <div class="d-flex justify-content-between align-items-center mt-4">
+                        <a href="{% url 'forneria:productos_detail' producto.id %}" class="btn btn-secondary">Cancelar</a>
+                        <button type="submit" class="btn btn-warning text-white">
+                            <i class="fas fa-save me-1"></i> {{ submit_label }}
                         </button>
                     </div>
                 </form>
             </div>
         </div>
     </div>
-    
-    <div class="col-md-4">
-        <div class="card">
+    <div class="col-lg-4">
+        <div class="card shadow-sm mb-3">
             <div class="card-header">
-                <h6>📊 Información Actual</h6>
+                <h6 class="mb-0">📊 Información actual</h6>
             </div>
-            <div class="card-body">
-                <table class="table table-sm">
-                    <tr>
-                        <th>ID:</th>
-                        <td>{{ producto.id }}</td>
-                    </tr>
-                    <tr>
-                        <th>Creado:</th>
-                        <td>{{ producto.creado|date:"d/m/Y H:i" }}</td>
-                    </tr>
-                    <tr>
-                        <th>Modificado:</th>
-                        <td>{{ producto.modificado|date:"d/m/Y H:i" }}</td>
-                    </tr>
-                    <tr>
-                        <th>Estado Stock:</th>
-                        <td>
-                            {% if producto.stock_actual <= producto.stock_minimo %}
-                                <span class="badge bg-danger">Bajo</span>
-                            {% elif producto.stock_actual >= producto.stock_maximo %}
-                                <span class="badge bg-success">Alto</span>
-                            {% else %}
-                                <span class="badge bg-warning">Normal</span>
-                            {% endif %}
-                        </td>
-                    </tr>
-                </table>
+            <div class="card-body small">
+                <dl class="row mb-0">
+                    <dt class="col-5">ID interno</dt>
+                    <dd class="col-7">{{ producto.id }}</dd>
+                    <dt class="col-5">Stock actual</dt>
+                    <dd class="col-7">{{ producto.stock_actual|default:0 }}</dd>
+                    <dt class="col-5">Estado</dt>
+                    <dd class="col-7">
+                        {% if producto.stock_actual <= producto.stock_minimo %}
+                            <span class="badge bg-danger">Bajo</span>
+                        {% elif producto.stock_actual >= producto.stock_maximo %}
+                            <span class="badge bg-success">Alto</span>
+                        {% else %}
+                            <span class="badge bg-warning text-dark">Normal</span>
+                        {% endif %}
+                    </dd>
+                </dl>
             </div>
         </div>
-        
-        <div class="card mt-3">
+        <div class="card shadow-sm">
             <div class="card-header">
-                <h6>⚠️ Validaciones</h6>
+                <h6 class="mb-0">⚠️ Validaciones clave</h6>
             </div>
-            <div class="card-body">
-                <ul class="list-unstyled small">
-                    <li><i class="fas fa-check text-success"></i> Caducidad > Elaboración</li>
-                    <li><i class="fas fa-check text-success"></i> Stock mínimo < Stock máximo</li>
-                    <li><i class="fas fa-check text-success"></i> Stock actual ≥ 0</li>
+            <div class="card-body small">
+                <ul class="list-unstyled mb-0">
+                    <li class="mb-2"><i class="fas fa-check text-success"></i> Caducidad posterior a la elaboración.</li>
+                    <li class="mb-2"><i class="fas fa-check text-success"></i> Stock mínimo menor que el máximo.</li>
+                    <li><i class="fas fa-check text-success"></i> Evita stocks negativos para mantener alertas correctas.</li>
                 </ul>
             </div>
         </div>

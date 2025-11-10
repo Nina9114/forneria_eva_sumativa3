@@ -1,0 +1,31 @@
+﻿{% extends "shop/base.html" %}
+{% load static %}
+
+{% block title %}Página no encontrada | Fornería{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center py-5">
+    <div class="col-lg-6 text-center">
+        <img src="{% static 'img/forneria-404.svg' %}" alt="Pan perdido" class="img-fluid mb-4" onerror="this.style.display='none';">
+        <h1 class="display-5 fw-bold mb-3">Ups, se nos quemó esta hornada</h1>
+        <p class="lead text-muted">
+            La página que intentas visitar no existe o dejó de estar disponible.
+            Vuelve al panel y sigue disfrutando de la Fornería.
+        </p>
+        <div class="d-grid gap-3 d-md-flex justify-content-md-center mt-4">
+            {% if user.is_authenticated %}
+                <a href="{% url 'forneria:dashboard_admin' %}" class="btn btn-primary">
+                    Ir al panel principal
+                </a>
+                <a href="{% url 'forneria:productos_list' %}" class="btn btn-outline-secondary">
+                    Revisar productos
+                </a>
+            {% else %}
+                <a href="{% url 'forneria:login' %}" class="btn btn-primary">
+                    Iniciar sesión
+                </a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

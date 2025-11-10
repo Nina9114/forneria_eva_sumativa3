@@ -1,0 +1,155 @@
+{% extends 'shop/base.html' %}
+{% load static %}
+
+{% block title %}Venta #{{ venta.id }} | Fornería{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3 mb-4">
+    <div>
+        <h1 class="h3 mb-0">Detalle de la venta #{{ venta.id }}</h1>
+        <p class="text-muted mb-0">Registrada el {{ venta.fecha|date:"d/m/Y H:i" }}</p>
+    </div>
+    <div class="d-flex gap-2 flex-wrap">
+        {% if user_can_change %}
+        <a href="{% url 'forneria:ventas_edit' venta.id %}" class="btn btn-outline-warning">
+            <i class="fas fa-edit"></i> Editar
+        </a>
+        {% endif %}
+        {% if user_can_delete %}
+        <form method="post" action="{% url 'forneria:ventas_delete' venta.id %}" class="d-inline" id="delete-form-venta-detail">
+            {% csrf_token %}
+            <input type="hidden" name="next" value="{% url 'forneria:ventas_list' %}">
+            <button type="button" class="btn btn-outline-danger"
+                    data-form="delete-form-venta-detail" data-nombre="Venta {{ venta.folio|default:venta.id }}"
+                    onclick="confirmarEliminacion(this)">
+                <i class="fas fa-trash"></i> Eliminar
+            </button>
+        </form>
+        {% endif %}
+        <a href="{% url 'forneria:ventas_list' %}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left"></i> Volver al listado
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-xl-7">
+        <div class="card shadow-sm mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Información general</h5>
+            </div>
+            <div class="card-body">
+                <dl class="row mb-0">
+                    <dt class="col-sm-4">Folio</dt>
+                    <dd class="col-sm-8">{{ venta.folio|default:'N/A' }}</dd>
+                    <dt class="col-sm-4">Cliente</dt>
+                    <dd class="col-sm-8">{{ venta.cliente_id.nombre }}</dd>
+                    <dt class="col-sm-4">Canal de venta</dt>
+                    <dd class="col-sm-8">{{ venta.get_canal_venta_display }}</dd>
+                    <dt class="col-sm-4">Fecha</dt>
+                    <dd class="col-sm-8">{{ venta.fecha|date:"d/m/Y H:i" }}</dd>
+                    <dt class="col-sm-4">Descuento aplicado</dt>
+                    <dd class="col-sm-8">${{ venta.descuento|floatformat:0 }}</dd>
+                </dl>
+            </div>
+        </div>
+
+        <div class="card shadow-sm">
+            <div class="card-header">
+                <h5 class="mb-0">Productos</h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table mb-0 align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Producto</th>
+                                <th class="text-center">Cantidad</th>
+                                <th class="text-end">Precio unitario</th>
+                                <th class="text-center">Desc. (%)</th>
+                                <th class="text-end">Subtotal</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in detalles_info %}
+                            {% with detalle=item.registro subtotal=item.subtotal %}
+                            <tr>
+                                <td>{{ detalle.producto_id.nombre }}</td>
+                                <td class="text-center">{{ detalle.cantidad }}</td>
+                                <td class="text-end">${{ detalle.precio_unitario|floatformat:0 }}</td>
+                                <td class="text-center">{{ detalle.descuento_pct|default:0 }}%</td>
+                                <td class="text-end">${{ subtotal|floatformat:0 }}</td>
+                            </tr>
+                            {% endwith %}
+                            {% empty %}
+                            <tr>
+                                <td colspan="5" class="text-center text-muted">No hay detalles registrados.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-5">
+        <div class="card shadow-sm mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Resumen de pago</h5>
+            </div>
+            <div class="card-body">
+                <table class="table table-borderless mb-0">
+                    <tr>
+                        <th>Total sin IVA:</th>
+                        <td class="text-end">${{ venta.total_sin_iva|floatformat:0 }}</td>
+                    </tr>
+                    <tr>
+                        <th>IVA (19%):</th>
+                        <td class="text-end">${{ venta.total_iva|floatformat:0 }}</td>
+                    </tr>
+                    <tr>
+                        <th>Descuento:</th>
+                        <td class="text-end text-danger">-${{ venta.descuento|floatformat:0 }}</td>
+                    </tr>
+                    <tr class="table-light">
+                        <th>Total a pagar:</th>
+                        <td class="text-end h5 mb-0">${{ venta.total_con_iva|floatformat:0 }}</td>
+                    </tr>
+                    <tr>
+                        <th>Monto pagado:</th>
+                        <td class="text-end">${{ venta.monto_pagado|floatformat:0 }}</td>
+                    </tr>
+                    <tr>
+                        <th>Vuelto:</th>
+                        <td class="text-end">${{ venta.vuelto|floatformat:0 }}</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+        <div class="card shadow-sm">
+            <div class="card-header">
+                <h5 class="mb-0">Acciones rápidas</h5>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    {% if user_can_change %}
+                    <a href="{% url 'forneria:ventas_edit' venta.id %}" class="btn btn-outline-warning">
+                        <i class="fas fa-edit"></i> Editar esta venta
+                    </a>
+                    {% endif %}
+                    {% if user_can_add %}
+                    <a href="{% url 'forneria:ventas_create' %}" class="btn btn-outline-primary">
+                        <i class="fas fa-plus"></i> Registrar otra venta
+                    </a>
+                    {% endif %}
+                    <a href="{% url 'forneria:ventas_list' %}" class="btn btn-outline-secondary">
+                        <i class="fas fa-list"></i> Volver al listado de ventas
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

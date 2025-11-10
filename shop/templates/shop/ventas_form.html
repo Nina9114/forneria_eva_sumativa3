@@ -1,0 +1,284 @@
+{% extends 'shop/base.html' %}
+{% load static %}
+
+{% block title %}{{ title }} | Fornería{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3 mb-4">
+    <div>
+        <h1 class="h3 mb-0">{{ title }}</h1>
+        <p class="text-muted mb-0">Completa la información de la venta y sus detalles.</p>
+    </div>
+    <a href="{% url 'forneria:ventas_list' %}" class="btn btn-outline-secondary">
+        <i class="fas fa-arrow-left"></i> Volver al listado
+    </a>
+</div>
+
+<form method="post" class="card shadow-sm" novalidate>
+    <div class="card-body">
+        {% csrf_token %}
+
+        {% if form.non_field_errors %}
+        <div class="alert alert-danger">
+            {% for error in form.non_field_errors %}
+                <div>{{ error }}</div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <div class="row g-3 mb-4">
+            <div class="col-md-6 col-lg-4">
+                <label class="form-label">{{ form.cliente_id.label }} *</label>
+                {{ form.cliente_id }}
+                {% if form.cliente_id.errors %}
+                    <div class="invalid-feedback d-block">{{ form.cliente_id.errors|striptags }}</div>
+                {% endif %}
+            </div>
+            <div class="col-md-3 col-lg-2">
+                <label class="form-label">{{ form.fecha.label }} *</label>
+                {{ form.fecha }}
+                {% if form.fecha.errors %}
+                    <div class="invalid-feedback d-block">{{ form.fecha.errors|striptags }}</div>
+                {% endif %}
+            </div>
+            <div class="col-md-3 col-lg-2">
+                <label class="form-label">{{ form.canal_venta.label }} *</label>
+                {{ form.canal_venta }}
+                {% if form.canal_venta.errors %}
+                    <div class="invalid-feedback d-block">{{ form.canal_venta.errors|striptags }}</div>
+                {% endif %}
+            </div>
+            <div class="col-md-3 col-lg-2">
+                <label class="form-label">{{ form.folio.label }}</label>
+                {{ form.folio }}
+                {% if form.folio.errors %}
+                    <div class="invalid-feedback d-block">{{ form.folio.errors|striptags }}</div>
+                {% endif %}
+            </div>
+            <div class="col-md-3 col-lg-2">
+                <label class="form-label">{{ form.descuento.label }}</label>
+                {{ form.descuento }}
+                {% if form.descuento.errors %}
+                    <div class="invalid-feedback d-block">{{ form.descuento.errors|striptags }}</div>
+                {% endif %}
+            </div>
+            <div class="col-md-3 col-lg-2">
+                <label class="form-label">{{ form.monto_pagado.label }}</label>
+                {{ form.monto_pagado }}
+                {% if form.monto_pagado.errors %}
+                    <div class="invalid-feedback d-block">{{ form.monto_pagado.errors|striptags }}</div>
+                {% endif %}
+            </div>
+        </div>
+
+        <hr>
+        <h2 class="h5 mb-3">Detalles de la venta</h2>
+
+        {% if formset.non_form_errors %}
+        <div class="alert alert-danger">
+            {% for error in formset.non_form_errors %}
+                <div>{{ error }}</div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        {{ formset.management_form }}
+        <div id="detalle-forms" class="row g-3">
+            {% for detalle_form in formset.forms %}
+            <div class="col-12">
+                <div class="card detalle-item" data-index="{{ forloop.counter0 }}">
+                    <div class="card-body">
+                        <div class="row g-3 align-items-end">
+                            <div class="col-md-4">
+                                <label class="form-label">{{ detalle_form.producto_id.label }} *</label>
+                                {{ detalle_form.producto_id }}
+                                <div class="form-text text-muted" data-role="producto-info"></div>
+                                {% if detalle_form.producto_id.errors %}
+                                    <div class="invalid-feedback d-block">{{ detalle_form.producto_id.errors|striptags }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label">{{ detalle_form.cantidad.label }} *</label>
+                                {{ detalle_form.cantidad }}
+                                {% if detalle_form.cantidad.errors %}
+                                    <div class="invalid-feedback d-block">{{ detalle_form.cantidad.errors|striptags }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label">{{ detalle_form.precio_unitario.label }} *</label>
+                                {{ detalle_form.precio_unitario }}
+                                {% if detalle_form.precio_unitario.errors %}
+                                    <div class="invalid-feedback d-block">{{ detalle_form.precio_unitario.errors|striptags }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label">{{ detalle_form.descuento_pct.label }}</label>
+                                {{ detalle_form.descuento_pct }}
+                                {% if detalle_form.descuento_pct.errors %}
+                                    <div class="invalid-feedback d-block">{{ detalle_form.descuento_pct.errors|striptags }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-2 text-md-end">
+                                {% if formset.can_delete %}
+                                <div class="form-check mt-4">
+                                    {{ detalle_form.DELETE }}
+                                    <label class="form-check-label">Eliminar</label>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% for hidden in detalle_form.hidden_fields %}
+                            {{ hidden }}
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="d-flex justify-content-between align-items-center mt-4">
+            <button type="button" class="btn btn-outline-primary" id="add-detalle">
+                <i class="fas fa-plus"></i> Agregar producto
+            </button>
+            <div class="d-flex gap-2">
+                <a href="{% url 'forneria:ventas_list' %}" class="btn btn-secondary">Cancelar</a>
+                <button type="submit" class="btn btn-success">
+                    <i class="fas fa-save me-1"></i> {{ submit_label }}
+                </button>
+            </div>
+        </div>
+    </div>
+</form>
+
+<template id="detalle-empty-form">
+    <div class="col-12">
+        <div class="card detalle-item" data-index="__prefix__">
+            <div class="card-body">
+                <div class="row g-3 align-items-end">
+                    <div class="col-md-4">
+                        <label class="form-label">{{ formset.empty_form.producto_id.label }} *</label>
+                        {{ formset.empty_form.producto_id.as_widget }}
+                        <div class="form-text text-muted" data-role="producto-info"></div>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">{{ formset.empty_form.cantidad.label }} *</label>
+                        {{ formset.empty_form.cantidad.as_widget }}
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">{{ formset.empty_form.precio_unitario.label }} *</label>
+                        {{ formset.empty_form.precio_unitario.as_widget }}
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">{{ formset.empty_form.descuento_pct.label }}</label>
+                        {{ formset.empty_form.descuento_pct.as_widget }}
+                    </div>
+                    <div class="col-md-2 text-md-end">
+                        {% if formset.can_delete %}
+                        <div class="form-check mt-4">
+                            {{ formset.empty_form.DELETE }}
+                            <label class="form-check-label">Eliminar</label>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% for hidden in formset.empty_form.hidden_fields %}
+                    {{ hidden }}
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</template>
+
+{{ productos_info|json_script:"productos-info-data" }}
+
+<script>
+(() => {
+    const productsDataEl = document.getElementById('productos-info-data');
+    const addButton = document.getElementById('add-detalle');
+    const container = document.getElementById('detalle-forms');
+    const emptyTemplate = document.getElementById('detalle-empty-form');
+
+    if (!container) return;
+
+    const productsMap = productsDataEl
+        ? new Map(JSON.parse(productsDataEl.textContent).map((item) => [item.id, item]))
+        : new Map();
+
+    function updateCard(card) {
+        if (!card) return;
+        const select = card.querySelector('.js-producto-select');
+        const priceInput = card.querySelector('.js-precio-input');
+        const qtyInput = card.querySelector('.js-cantidad-input');
+        const infoBox = card.querySelector('[data-role="producto-info"]');
+
+        if (!select) return;
+
+        const productId = parseInt(select.value || '', 10);
+        const product = productsMap.get(productId);
+
+        if (product) {
+            const lastProductId = priceInput ? priceInput.dataset.lastProductId : null;
+            const changedProduct = priceInput && lastProductId !== String(productId);
+
+            if (priceInput && (priceInput.value === '' || priceInput.dataset.autofilled === 'true' || changedProduct)) {
+                priceInput.value = Number(product.precio).toFixed(2);
+                priceInput.dataset.autofilled = 'true';
+            }
+            if (priceInput) {
+                priceInput.dataset.lastProductId = String(productId);
+            }
+            if (qtyInput) {
+                qtyInput.placeholder = product.formato || 'Cantidad';
+            }
+            if (infoBox) {
+                const parts = [];
+                parts.push('Precio base: $' + Number(product.precio).toFixed(2));
+                if (product.presentacion) parts.push('Presentación: ' + product.presentacion);
+                if (product.formato) parts.push('Formato: ' + product.formato);
+                parts.push('Stock actual: ' + product.stock);
+                infoBox.textContent = parts.join(' | ');
+            }
+        } else {
+            if (priceInput) priceInput.dataset.lastProductId = '';
+            if (infoBox) infoBox.textContent = '';
+            if (qtyInput) qtyInput.placeholder = 'Cantidad';
+        }
+    }
+
+    container.addEventListener('change', (event) => {
+        if (event.target.matches('.js-producto-select')) {
+            updateCard(event.target.closest('.detalle-item'));
+        }
+    });
+
+    container.addEventListener('input', (event) => {
+        if (event.target.matches('.js-precio-input')) {
+            event.target.dataset.autofilled = 'false';
+        }
+    });
+
+    function refreshExistingCards() {
+        container.querySelectorAll('.detalle-item').forEach((card) => updateCard(card));
+    }
+
+    refreshExistingCards();
+
+    if (addButton && emptyTemplate) {
+        addButton.addEventListener('click', () => {
+            const totalFormsInput = document.querySelector('[name="detalles-TOTAL_FORMS"]');
+            const currentCount = parseInt(totalFormsInput.value, 10);
+            const newHtml = emptyTemplate.innerHTML.replace(/__prefix__/g, currentCount);
+            container.insertAdjacentHTML('beforeend', newHtml);
+            totalFormsInput.value = currentCount + 1;
+
+            const selector = '.detalle-item[data-index="' + currentCount + '"]';
+            const newCard = container.querySelector(selector);
+            if (newCard) {
+                updateCard(newCard);
+                newCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        });
+    }
+})();
+</script>
+{% endblock %}
