@@ -1,6 +1,8 @@
 from datetime import datetime, time
 from decimal import Decimal
 
+from django.http import JsonResponse
+
 from django.db import transaction
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout
@@ -834,3 +836,12 @@ def _export_ventas_excel(queryset):
     response['Content-Disposition'] = f'attachment; filename="{filename}.xlsx"'
     workbook.save(response)
     return response
+
+
+
+def info(request):
+    return JsonResponse({
+        "proyecto": "EcoEnergy",
+        "version": "1.0",
+        "autor": "Magdalena Armstrong"  
+    })

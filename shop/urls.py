@@ -1,5 +1,8 @@
 from django.urls import path
-from . import views
+from . import views 
+from .views import info
+
+
 
 app_name = 'forneria'
 
@@ -36,4 +39,6 @@ urlpatterns = [
     path('ventas/<int:venta_id>/', views.ventas_detail, name='ventas_detail'),
     path('ventas/<int:venta_id>/editar/', views.ventas_edit, name='ventas_edit'),
     path('ventas/<int:venta_id>/eliminar/', views.ventas_delete, name='ventas_delete'),
+
+    path('api/info/', info, name='info'),
 ]
